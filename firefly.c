@@ -12,8 +12,8 @@
 
 const int msecsDelayPost = 125;      // delay between iterations
 
-#define COMBINED_ITERATIONS 60    // number of iterations in a cycle 
-#define FF1_ITERATIONS 10
+#define COMBINED_ITERATIONS 132      // number of iterations in a cycle 
+#define FF1_ITERATIONS 11
 #define FF2_ITERATIONS 12
 
 #define FF1_MALE   PB3   // pin 2
@@ -29,10 +29,10 @@ const unsigned char lights[] = {
     1<<FF1_MALE | 0<<FF1_FEMALE | 1<<FF2_MALE | 0<<FF2_FEMALE ,  //  0
     1<<FF1_MALE | 0<<FF1_FEMALE | 1<<FF2_MALE | 0<<FF2_FEMALE ,  //  1
     0<<FF1_MALE | 0<<FF1_FEMALE | 1<<FF2_MALE | 0<<FF2_FEMALE ,  //  2
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  3
-    0<<FF1_MALE | 1<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  4
+    0<<FF1_MALE | 1<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  3
+    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 1<<FF2_FEMALE ,  //  4
     0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 1<<FF2_FEMALE ,  //  5
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 1<<FF2_FEMALE ,  //  6
+    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  6
     0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  7
     0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  8
     0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  9
