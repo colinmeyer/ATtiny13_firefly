@@ -67,6 +67,31 @@ const unsigned char lights[] = {
 
 int main(void)
 {
+    // Setup
+
+    // Power Saving cf. 7.4 p.32
+    //
+    // turn off ADC
+    ADCSRA &= ~(1<<ADEN);
+    //
+    // turn off Analog Comparator
+    ACSR &= ~(1<<ACD);
+    //
+    // turn off Brownout Detector
+    // not necessary; off by default
+    //
+    // turn off Internal Voltage Reference
+    // not necessary; ADC is off & BOD is off
+    //
+    // turn off all digital inputs Port Pins
+    DIDR0 = 
+        (1<<AIN0D) |
+        (1<<AIN1D) |
+        (1<<ADC0D) |
+        (1<<ADC1D) |
+        (1<<ADC2D) |
+        (1<<ADC3D);
+
 
     // Set up Port B pin 0,1,3,4 mode to output
     DDRB = 1<<DDB0 | 1<<DDB1 | 1<<DDB3 | 1<<DDB4;
