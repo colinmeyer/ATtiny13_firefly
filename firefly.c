@@ -75,7 +75,7 @@ int main(void)
     PORTB = 0;  
 
     while (1) {
-        unsigned char c;
+        unsigned int c; // 16 bit
         for ( c = 0; c < COMBINED_ITERATIONS; c++ ) {
             // set PORT B to whatever the lookup table says
             unsigned char ff1_idx = c % FF1_ITERATIONS;
