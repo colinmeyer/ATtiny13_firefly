@@ -8,9 +8,10 @@
 
 #include <avr/io.h>
 #define F_CPU 9.6E6L /* CPU Freq. Must come before delay.h include. 9.6MHz */
+                     // system clock prescaler is /8 by default
 #include <util/delay.h>
 
-const int msecsDelayPost = 250;      // delay between iterations
+#define msecsDelayPost  250/8        // delay between iterations
 
 #define COMBINED_ITERATIONS 1155     // number of iterations in a cycle 
 #define FF1_ITERATIONS 33
