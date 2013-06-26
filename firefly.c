@@ -68,7 +68,7 @@ const unsigned char lights[] = {
 int main(void)
 {
 
-    // Set up Port B pin 3,4 mode to output
+    // Set up Port B pin 0,1,3,4 mode to output
     DDRB = 1<<DDB0 | 1<<DDB1 | 1<<DDB3 | 1<<DDB4;
 
     // Set up Port B data to be all low
@@ -83,7 +83,7 @@ int main(void)
             PORTB = (lights[ff1_idx] & FF1_MASK) | (lights[ff2_idx] & FF2_MASK);
 
             // Pause a little while
-            _delay_ms (msecsDelayPost);
+            _delay_ms(msecsDelayPost);
         }
     }
 
