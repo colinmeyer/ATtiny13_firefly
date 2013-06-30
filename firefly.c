@@ -7,11 +7,8 @@
  */
 
 #include <avr/io.h>
-#define F_CPU 9.6E6L / 8 // CPU Freq. Must come before delay.h include. 9.6MHz
-                         // system clock prescaler is /8 by default
-#include <util/delay.h>
-
-#define msecsDelayPost  250          // delay between iterations
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 #define COMBINED_ITERATIONS 1155     // number of iterations in a cycle 
 #define FF1_ITERATIONS 33
@@ -65,6 +62,19 @@ const unsigned char lights[] = {
     0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  35
 };
 
+
+unsigned int c=0; // 16 bit
+ISR(WDT_vect) {
+    // set PORT B to whatever the lookup table says
+    unsigned char ff1_idx = c % FF1_ITERATIONS;
+    unsigned char ff2_idx = c % FF2_ITERATIONS;
+    PORTB = (lights[ff1_idx] & FF1_MASK) | (lights[ff2_idx] & FF2_MASK);
+
+    // increment loop counter; reset if we've reached the LCM
+    if (++c==COMBINED_ITERATIONS)
+        c=0;
+}
+
 int main(void)
 {
     // Setup
@@ -99,17 +109,18 @@ int main(void)
     // Set up Port B data to be all low
     PORTB = 0;  
 
-    while (1) {
-        unsigned int c; // 16 bit
-        for ( c = 0; c < COMBINED_ITERATIONS; c++ ) {
-            // set PORT B to whatever the lookup table says
-            unsigned char ff1_idx = c % FF1_ITERATIONS;
-            unsigned char ff2_idx = c % FF2_ITERATIONS;
-            PORTB = (lights[ff1_idx] & FF1_MASK) | (lights[ff2_idx] & FF2_MASK);
+    // set wdt prescaler
+    WDTCR = (1<<WDP2);   // 32k ~.25s  8.5.2 p.43
 
-            // Pause a little while
-            _delay_ms(msecsDelayPost);
-        }
+    // Enable watchdog timer interrupts
+    WDTCR |= (1<<WDTIE);
+
+    sei(); // Enable global interrupts 
+
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+
+    while (1) {
+        sleep_mode();
     }
 
     return 0;
