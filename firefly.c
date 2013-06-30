@@ -10,6 +10,13 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
+#define F_CPU 9.6E6L/8 // CPU Freq. Must come before delay.h include. 9.6MHz
+                       // by default, sysclock is /8
+#include <util/delay.h>
+
+#define POWER_DELAY         1
+#define MEASURE_GAP_DELAY 100
+
 #define COMBINED_ITERATIONS 1155     // number of iterations in a cycle 
 #define FF1_ITERATIONS 33
 #define FF2_ITERATIONS 35
@@ -63,17 +70,102 @@ const unsigned char lights[] = {
 };
 
 
-unsigned int c=0; // 16 bit
-ISR(WDT_vect) {
-    // set PORT B to whatever the lookup table says
-    unsigned char ff1_idx = c % FF1_ITERATIONS;
-    unsigned char ff2_idx = c % FF2_ITERATIONS;
-    PORTB = (lights[ff1_idx] & FF1_MASK) | (lights[ff2_idx] & FF2_MASK);
+// light meter returns true when it's dark out
+char light_is_low_enough() {
+    // read ADC2 input
+    ADMUX = 2               // Select channel ADC = 2
+        | (1<<ADLAR);       // Left shift 8 significant bits to ADCH
+    ADCSRA |= (1<<ADEN)     // turn on ADC
+        | (1<<ADPS0)        // set prescaler to sysclck/128 for greater accuracy
+        | (1<<ADPS1)        // cf. 14.5 p.84 & 14.12.2 p.94
+        | (1<<ADPS2);
 
-    // increment loop counter; reset if we've reached the LCM
-    if (++c==COMBINED_ITERATIONS)
-        c=0;
+    // throw away
+    ADCSRA |= (1 << ADSC);        // start single conversion
+    while (ADCSRA & (1 << ADSC)); // wait until conversion is done
+
+    unsigned char  first_measure  = 0;  // 8 bit
+    unsigned char  second_measure = 0;
+
+    // charge detector LED briefly (it is a capacitor)
+    DDRB  |=  (1<<DDB4); // select pin 3 for output
+    PORTB |=  (1<<PB4 ); // set pin to high
+    _delay_ms(POWER_DELAY); // charge for some time
+
+    DDRB  &= ~(1<<DDB4); // select pin 3 for tri-state
+                         // currently, pin is still tied to pull-up resistor
+                         // cf.  10.2.3 p.51
+    PORTB &= ~(1<<PB4 ); // set pin to low (switch pull-up resistor off)
+                         // now pin is tri-state
+
+    ADCSRA |= (1 << ADSC);        // start single conversion
+    while (ADCSRA & (1 << ADSC)); // wait until conversion is done
+
+    // take first voltage measurement
+    first_measure = ADCH;
+
+    // delay some constant time amount, while LED discharges
+    _delay_ms(MEASURE_GAP_DELAY);
+
+    ADCSRA |= (1 << ADSC);        // start single conversion
+    while (ADCSRA & (1 << ADSC)); // wait until conversion is done
+
+    second_measure = ADCH;
+
+    // turn off ADC
+    ADCSRA &= ~(1<<ADEN);
+
+    // calculate the diff between the two -- the amount that the capacitor has discharged
+    // bright shining on the LED makes it discharge quicker
+    // so the second measure will be lower
+    // causing the displayed number (diff) to be higher
+    unsigned char diff;
+    if ( first_measure > second_measure )
+        diff = first_measure - second_measure;
+    else
+        diff = 0;
+
+
+    // less than 0x38 means dark
+    return (diff < 0x38) ? 1 : 0;
 }
+
+
+unsigned int c=0;       // 16 bit
+unsigned char mode = 0; // 0 = light meter
+                        // 1 = firefly
+ISR(WDT_vect) {
+    if (mode==0) {
+//         if (light_is_low_enough()) {
+        if (1) {
+            mode=1;    // switch to firefly
+
+            // adjust WDT prescaler
+            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
+                | (1<<WDP2);       // 32k ~.25 8.5.2 p.43
+        }
+    }
+
+    if (mode==1) {
+        // set PORT B to whatever the lookup table says
+        unsigned char ff1_idx = c % FF1_ITERATIONS;
+        unsigned char ff2_idx = c % FF2_ITERATIONS;
+        PORTB = (lights[ff1_idx] & FF1_MASK) | (lights[ff2_idx] & FF2_MASK);
+
+        // increment loop counter; reset if we've reached the LCM
+//         if (++c==COMBINED_ITERATIONS) {
+        if (++c==FF2_ITERATIONS) {
+            // change to light meter
+            mode=0;
+
+            // adjust WDT prescaler
+            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
+                | (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
+
+        }
+    }
+}
+
 
 int main(void)
 {
@@ -110,7 +202,7 @@ int main(void)
     PORTB = 0;  
 
     // set wdt prescaler
-    WDTCR = (1<<WDP2);   // 32k ~.25s  8.5.2 p.43
+    WDTCR = (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
 
     // Enable watchdog timer interrupts
     WDTCR |= (1<<WDTIE);
