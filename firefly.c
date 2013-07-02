@@ -11,7 +11,8 @@
 #include <avr/sleep.h>
 
 // defines lights[]
-#include "photinus_consimilis.h"
+// #include "photinus_consimilis.h"
+#include "photinus_pyralis.h"
 
 unsigned int c=0; // 16 bit
 ISR(WDT_vect) {
