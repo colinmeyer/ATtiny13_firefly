@@ -82,11 +82,11 @@ char light_is_low_enough() {
     unsigned char  second_measure = 0;
 
     // charge detector LED briefly (it is a capacitor)
-    DDRB  |=  (1<<DDB4); // select pin 3 for output
-    PORTB |=  (1<<FF1_MALE_ ); // set pin to high
+    DDRB  =  (1<<DDB4); // select pin 3 for output
+    PORTB =  (1<<FF1_MALE_ ); // set pin to high
     _delay_ms(POWER_DELAY); // charge for some time
 
-    DDRB  &= ~(1<<DDB4); // select pin 3 for tri-state
+    DDRB  = 0;           // select pin 3 for tri-state
                          // currently, pin is still tied to pull-up resistor
                          // cf.  10.2.3 p.51
     PORTB &= ~(1<<FF1_MALE_ ); // set pin to low (switch pull-up resistor off)
@@ -141,6 +141,9 @@ ISR(WDT_vect) {
     }
 
     if (mode==1) {
+        // set output pins
+        DDRB  = (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
+
         // set PORT B to whatever the lookup table says
         PORTB = (lights[c] & FF1_MASK);
 
@@ -187,13 +190,6 @@ int main(void)
         (1<<ADC1D) |
         (1<<ADC2D) |
         (1<<ADC3D);
-
-
-    // Set up Port B pin 1,3,4 mode to output
-    DDRB = 1<<DDB1 | 1<<DDB3 | 1<<DDB4;
-
-    // Set up Port B data to be all low
-    PORTB = 0;  
 
     // set wdt prescaler
     WDTCR = (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
