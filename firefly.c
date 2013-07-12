@@ -17,56 +17,50 @@
 #define POWER_DELAY         1
 #define MEASURE_GAP_DELAY 100
 
-#define COMBINED_ITERATIONS 1155     // number of iterations in a cycle 
 #define FF1_ITERATIONS 33
-#define FF2_ITERATIONS 35
 
 #define FF1_MALE   PB3   // pin 2
-#define FF1_FEMALE PB4   // pin 3
-#define FF2_MALE   PB0   // pin 5
-#define FF2_FEMALE PB1   // pin 6
+#define FF1_MALE_  PB4   // pin 3
+#define FF1_FEMALE PB1   // pin 6
 
 #define FF1_MASK (1<<FF1_MALE | 1<<FF1_FEMALE)
-#define FF2_MASK (1<<FF2_MALE | 1<<FF2_FEMALE)
 
 // lookup table for lights status at each iteration
 const unsigned char lights[] = {
-    1<<FF1_MALE | 0<<FF1_FEMALE | 1<<FF2_MALE | 0<<FF2_FEMALE ,  //  0
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  1
-    1<<FF1_MALE | 0<<FF1_FEMALE | 1<<FF2_MALE | 0<<FF2_FEMALE ,  //  2
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  3
-    1<<FF1_MALE | 0<<FF1_FEMALE | 1<<FF2_MALE | 0<<FF2_FEMALE ,  //  4
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  5
-    1<<FF1_MALE | 0<<FF1_FEMALE | 1<<FF2_MALE | 0<<FF2_FEMALE ,  //  6
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  7
-    1<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  8
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  9
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  10
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  11
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  12
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  13
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  14
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  15
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  16
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  17
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 1<<FF2_FEMALE ,  //  18
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  19
-    0<<FF1_MALE | 1<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  20
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  21
-    0<<FF1_MALE | 1<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  22
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  23
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  24
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  25
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  26
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  27
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  28
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  29
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  30
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  31
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  32
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  33
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  34
-    0<<FF1_MALE | 0<<FF1_FEMALE | 0<<FF2_MALE | 0<<FF2_FEMALE ,  //  35
+    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  0
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  1
+    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  2
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  3
+    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  4
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  5
+    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  6
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  7
+    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  8
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  9
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  10
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  11
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  12
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  13
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  14
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  15
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  16
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  17
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  18
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  19
+    0<<FF1_MALE | 1<<FF1_FEMALE ,  //  20
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  21
+    0<<FF1_MALE | 1<<FF1_FEMALE ,  //  22
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  23
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  24
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  25
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  26
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  27
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  28
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  29
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  30
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  31
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  32
+    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  33
 };
 
 
@@ -89,13 +83,13 @@ char light_is_low_enough() {
 
     // charge detector LED briefly (it is a capacitor)
     DDRB  |=  (1<<DDB4); // select pin 3 for output
-    PORTB |=  (1<<PB4 ); // set pin to high
+    PORTB |=  (1<<FF1_MALE_ ); // set pin to high
     _delay_ms(POWER_DELAY); // charge for some time
 
     DDRB  &= ~(1<<DDB4); // select pin 3 for tri-state
                          // currently, pin is still tied to pull-up resistor
                          // cf.  10.2.3 p.51
-    PORTB &= ~(1<<PB4 ); // set pin to low (switch pull-up resistor off)
+    PORTB &= ~(1<<FF1_MALE_ ); // set pin to low (switch pull-up resistor off)
                          // now pin is tri-state
 
     ADCSRA |= (1 << ADSC);        // start single conversion
@@ -136,9 +130,9 @@ unsigned char mode = 0; // 0 = light meter
                         // 1 = firefly
 ISR(WDT_vect) {
     if (mode==0) {
-//         if (light_is_low_enough()) {
-        if (1) {
-            mode=1;    // switch to firefly
+        if (light_is_low_enough()) {
+            // switch to firefly
+            mode=1;
 
             // adjust WDT prescaler
             WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
@@ -148,15 +142,15 @@ ISR(WDT_vect) {
 
     if (mode==1) {
         // set PORT B to whatever the lookup table says
-        unsigned char ff1_idx = c % FF1_ITERATIONS;
-        unsigned char ff2_idx = c % FF2_ITERATIONS;
-        PORTB = (lights[ff1_idx] & FF1_MASK) | (lights[ff2_idx] & FF2_MASK);
+        PORTB = (lights[c] & FF1_MASK);
 
-        // increment loop counter; reset if we've reached the LCM
-//         if (++c==COMBINED_ITERATIONS) {
-        if (++c==FF2_ITERATIONS) {
+        if (++c==FF1_ITERATIONS) {
             // change to light meter
             mode=0;
+            c=0;
+
+            // shut off all lights
+            PORTB = 0;
 
             // adjust WDT prescaler
             WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
@@ -180,10 +174,10 @@ int main(void)
     ACSR &= ~(1<<ACD);
     //
     // turn off Brownout Detector
-    // not necessary; off by default
+    //  - not necessary; off by default
     //
     // turn off Internal Voltage Reference
-    // not necessary; ADC is off & BOD is off
+    //  - not necessary; ADC is off & BOD is off
     //
     // turn off all digital inputs Port Pins
     DIDR0 = 
@@ -195,8 +189,8 @@ int main(void)
         (1<<ADC3D);
 
 
-    // Set up Port B pin 0,1,3,4 mode to output
-    DDRB = 1<<DDB0 | 1<<DDB1 | 1<<DDB3 | 1<<DDB4;
+    // Set up Port B pin 1,3,4 mode to output
+    DDRB = 1<<DDB1 | 1<<DDB3 | 1<<DDB4;
 
     // Set up Port B data to be all low
     PORTB = 0;  
