@@ -26,7 +26,7 @@
 #define FF1_MASK (1<<FF1_MALE | 1<<FF1_FEMALE)
 
 // lookup table for lights status at each iteration
-const unsigned char lights[] = {
+const uint8_t lights[] = {
     1<<FF1_MALE | 0<<FF1_FEMALE ,  //  0
     0<<FF1_MALE | 0<<FF1_FEMALE ,  //  1
     1<<FF1_MALE | 0<<FF1_FEMALE ,  //  2
@@ -65,7 +65,7 @@ const unsigned char lights[] = {
 
 
 // light meter returns true when it's dark out
-char light_is_low_enough() {
+uint8_t light_is_low_enough() {
     // read ADC2 input
     ADMUX = 2               // Select channel ADC = 2
         | (1<<ADLAR);       // Left shift 8 significant bits to ADCH
@@ -78,8 +78,8 @@ char light_is_low_enough() {
     ADCSRA |= (1 << ADSC);        // start single conversion
     while (ADCSRA & (1 << ADSC)); // wait until conversion is done
 
-    unsigned char  first_measure  = 0;  // 8 bit
-    unsigned char  second_measure = 0;
+    uint8_t  first_measure  = 0;  // 8 bit
+    uint8_t  second_measure = 0;
 
     // charge detector LED briefly (it is a capacitor)
     DDRB  =  (1<<DDB4); // select pin 3 for output
@@ -113,21 +113,21 @@ char light_is_low_enough() {
     // bright shining on the LED makes it discharge quicker
     // so the second measure will be lower
     // causing the displayed number (diff) to be higher
-    unsigned char diff;
+    uint8_t diff;
     if ( first_measure > second_measure )
         diff = first_measure - second_measure;
     else
         diff = 0;
 
 
-    // less than 0x38 means dark
-    return (diff < 0x38) ? 1 : 0;
+    // smaller is darker; function returns true for dark
+    return (diff < 0x04) ? 1 : 0;
 }
 
 
-unsigned int c=0;       // 16 bit
-unsigned char mode = 0; // 0 = light meter
-                        // 1 = firefly
+uint16_t c=0;      // 16 bit
+uint8_t  mode = 0; // 0 = light meter
+                   // 1 = firefly
 ISR(WDT_vect) {
     if (mode==0) {
         if (light_is_low_enough()) {
