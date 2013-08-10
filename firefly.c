@@ -6,6 +6,7 @@
  *
  */
 
+#include <avr/eeprom.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
@@ -15,7 +16,7 @@
 #include <util/delay.h>
 
 #define POWER_DELAY         1
-#define MEASURE_GAP_DELAY 100
+#define MEASURE_GAP_DELAY  10
 
 #define FF1_ITERATIONS 33
 
@@ -67,8 +68,7 @@ const uint8_t lights[] = {
 // light meter returns true when it's dark out
 uint8_t light_is_low_enough() {
     // read ADC2 input
-    ADMUX = 2               // Select channel ADC = 2
-        | (1<<ADLAR);       // Left shift 8 significant bits to ADCH
+    ADMUX = 2;              // Select channel ADC = 2
     ADCSRA |= (1<<ADEN)     // turn on ADC
         | (1<<ADPS0)        // set prescaler to sysclck/128 for greater accuracy
         | (1<<ADPS1)        // cf. 14.5 p.84 & 14.12.2 p.94
@@ -78,8 +78,10 @@ uint8_t light_is_low_enough() {
     ADCSRA |= (1 << ADSC);        // start single conversion
     while (ADCSRA & (1 << ADSC)); // wait until conversion is done
 
-    uint8_t  first_measure  = 0;  // 8 bit
-    uint8_t  second_measure = 0;
+    uint8_t   adcl;
+    uint8_t   adch;
+    uint16_t  first_measure  = 0;
+    uint16_t  second_measure = 0;
 
     // charge detector LED briefly (it is a capacitor)
     DDRB  =  (1<<DDB4); // select pin 3 for output
@@ -96,7 +98,18 @@ uint8_t light_is_low_enough() {
     while (ADCSRA & (1 << ADSC)); // wait until conversion is done
 
     // take first voltage measurement
-    first_measure = ADCH;
+    adcl = ADCL;
+    adch = ADCH;
+    first_measure = adch << 8 | adcl;
+    static uint8_t write_count = 0;
+    uint8_t offset = 4 * write_count;
+    eeprom_update_byte((uint8_t *)offset,   adch);
+    eeprom_update_byte((uint8_t *)offset+1, adcl);
+    eeprom_update_word((uint16_t *)offset+2, first_measure);
+    if ( ++write_count >= 64/4 ) {
+        exit((int)1);
+    }
+
 
     // delay some constant time amount, while LED discharges
     _delay_ms(MEASURE_GAP_DELAY);
@@ -104,7 +117,9 @@ uint8_t light_is_low_enough() {
     ADCSRA |= (1 << ADSC);        // start single conversion
     while (ADCSRA & (1 << ADSC)); // wait until conversion is done
 
-    second_measure = ADCH;
+    adcl = ADCL;
+    adch = ADCH;
+    first_measure = adch << 8 | adcl;
 
     // turn off ADC
     ADCSRA &= ~(1<<ADEN);
@@ -113,15 +128,15 @@ uint8_t light_is_low_enough() {
     // bright shining on the LED makes it discharge quicker
     // so the second measure will be lower
     // causing the displayed number (diff) to be higher
-    uint8_t diff;
-    if ( first_measure > second_measure )
+    uint16_t diff;
+//     if ( first_measure > second_measure )
         diff = first_measure - second_measure;
-    else
-        diff = 0;
+//     else
+//         diff = 0;
 
 
     // smaller is darker; function returns true for dark
-    return (diff < 0x04) ? 1 : 0;
+    return (diff < 0x0300) ? 1 : 0;
 }
 
 
@@ -145,19 +160,15 @@ ISR(WDT_vect) {
         DDRB  = (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
 
         // set PORT B to whatever the lookup table says
-        PORTB = (lights[c] & FF1_MASK);
+        PORTB = 1<<FF1_MALE;
 
-        if (++c==FF1_ITERATIONS) {
+        if (++c==3) {
             // change to light meter
             mode=0;
             c=0;
 
             // shut off all lights
             PORTB = 0;
-
-            // adjust WDT prescaler
-            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
-                | (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
 
         }
     }
