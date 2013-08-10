@@ -103,3 +103,6 @@ chiperase:
 chipburn:
 	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$(PRG).hex
 
+readeeprom:
+	$(AVRDUDE) $(AVRDUDE_FLAGS) -U eeprom:r:${PRG}_eeprom:h
+
