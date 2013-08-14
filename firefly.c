@@ -91,92 +91,42 @@ uint8_t light_is_low_enough() {
     // so the second measure will be lower
     // causing the displayed number (diff) to be higher
     uint16_t diff;
-//     if ( first_measure > second_measure )
+    if ( second_measure > first_measure )
+        diff = 0;
+    else
         diff = first_measure - second_measure;
-//     else
-//         diff = 0;
 
+    static uint8_t write_address = 0;
+//     eeprom_update_word((uint16_t *)(write_address), first_measure);
+//     write_address += 2;
+// 
+//     eeprom_update_word((uint16_t *)(write_address), second_measure);
+//     write_address += 2;
+
+    eeprom_update_word((uint16_t *)(write_address), diff);
+    write_address += 2;
 
     // smaller is darker; function returns true for dark
     return (diff < 0x0300) ? 1 : 0;
 }
 
 
-uint16_t c=0;      // 16 bit
-uint8_t  mode = 0; // 0 = light meter
-                   // 1 = firefly
-ISR(WDT_vect) {
-    if (mode==0) {
-        if (light_is_low_enough()) {
-            // switch to firefly
-            mode=1;
-
-            // adjust WDT prescaler
-            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
-                | (1<<WDP2);       // 32k ~.25 8.5.2 p.43
-        }
-    }
-
-    if (mode==1) {
-        // set output pins
-        DDRB  = (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
-
-        // set PORT B to whatever the lookup table says
-        PORTB = 1<<FF1_MALE;
-
-        if (++c==3) {
-            // change to light meter
-            mode=0;
-            c=0;
-
-            // shut off all lights
-            PORTB = 0;
-
-        }
-    }
-}
-
 
 int main(void)
 {
-    // Setup
 
-    // Power Saving cf. 7.4 p.32
-    //
-    // turn off ADC
-    ADCSRA &= ~(1<<ADEN);
-    //
-    // turn off Analog Comparator
-    ACSR &= ~(1<<ACD);
-    //
-    // turn off Brownout Detector
-    //  - not necessary; off by default
-    //
-    // turn off Internal Voltage Reference
-    //  - not necessary; ADC is off & BOD is off
-    //
-    // turn off all digital inputs Port Pins
-    DIDR0 = 
-        (1<<AIN0D) |
-        (1<<AIN1D) |
-        (1<<ADC0D) |
-        (1<<ADC1D) |
-        (1<<ADC2D) |
-        (1<<ADC3D);
-
-    // set wdt prescaler
-    WDTCR = (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
-
-    // Enable watchdog timer interrupts
-    WDTCR |= (1<<WDTIE);
-
-    sei(); // Enable global interrupts 
-
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-
-    while (1) {
-        sleep_mode();
+    uint8_t c;
+    for ( c = 0; c < 64/2; c++ ) { // writing four bytes each call it light_is_low_enough()
+        light_is_low_enough();
+        _delay_ms(100);
     }
+
+    // set output pins
+    DDRB  = (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
+    // turn on light
+    PORTB = 1<<FF1_MALE;
+    _delay_ms(250);
+
 
     return 0;
 }
