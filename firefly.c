@@ -81,7 +81,7 @@ uint8_t light_is_low_enough() {
 
     adcl = ADCL;
     adch = ADCH;
-    first_measure = adch << 8 | adcl;
+    second_measure = adch << 8 | adcl;
 
     // turn off ADC
     ADCSRA &= ~(1<<ADEN);
