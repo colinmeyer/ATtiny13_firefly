@@ -64,8 +64,9 @@ const uint8_t lights[] = {
 };
 
 
-// light meter returns true when it's dark out
-uint8_t light_is_low_enough() {
+// light returns count of ADC samples for LED capacitor to reach zero
+//   count < 30 means light out
+uint8_t light_detect() {
     // read ADC2 input
     ADMUX = 2               // Select channel ADC = 2
         | (1<<ADLAR);       // Left shift 8 significant bits to ADCH
@@ -78,8 +79,8 @@ uint8_t light_is_low_enough() {
     ADCSRA |= (1 << ADSC);        // start single conversion
     while (ADCSRA & (1 << ADSC)); // wait until conversion is done
 
-    uint8_t  first_measure  = 0;  // 8 bit
-    uint8_t  second_measure = 0;
+    uint8_t   adcl;
+    uint8_t   adch;
 
     // charge detector LED briefly (it is a capacitor)
     DDRB  =  (1<<DDB4); // select pin 3 for output
@@ -92,36 +93,22 @@ uint8_t light_is_low_enough() {
     PORTB &= ~(1<<FF1_MALE_ ); // set pin to low (switch pull-up resistor off)
                          // now pin is tri-state
 
-    ADCSRA |= (1 << ADSC);        // start single conversion
-    while (ADCSRA & (1 << ADSC)); // wait until conversion is done
+    uint8_t c = 0;
+    do {
+        c++;
+        ADCSRA |= (1 << ADSC);        // start single conversion
+        while (ADCSRA & (1 << ADSC)); // wait until conversion is done
 
-    // take first voltage measurement
-    first_measure = ADCH;
-
-    // delay some constant time amount, while LED discharges
-    _delay_ms(MEASURE_GAP_DELAY);
-
-    ADCSRA |= (1 << ADSC);        // start single conversion
-    while (ADCSRA & (1 << ADSC)); // wait until conversion is done
-
-    second_measure = ADCH;
+        // take first voltage measurement
+        adcl = ADCL;
+        adch = ADCH;
+    }
+    while ( adch > 0 && adcl > 0x10 );
 
     // turn off ADC
     ADCSRA &= ~(1<<ADEN);
 
-    // calculate the diff between the two -- the amount that the capacitor has discharged
-    // bright shining on the LED makes it discharge quicker
-    // so the second measure will be lower
-    // causing the displayed number (diff) to be higher
-    uint8_t diff;
-    if ( first_measure > second_measure )
-        diff = first_measure - second_measure;
-    else
-        diff = 0;
-
-
-    // smaller is darker; function returns true for dark
-    return (diff < 0x04) ? 1 : 0;
+    return c;
 }
 
 
