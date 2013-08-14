@@ -63,15 +63,6 @@ uint8_t light_is_low_enough() {
     adcl = ADCL;
     adch = ADCH;
     first_measure = adch << 8 | adcl;
-    static uint8_t write_count = 0;
-    uint8_t offset = 4 * write_count;
-    eeprom_update_byte((uint8_t *)offset,   adch);
-    eeprom_update_byte((uint8_t *)offset+1, adcl);
-    eeprom_update_word((uint16_t *)offset+2, first_measure);
-    if ( ++write_count >= 64/4 ) {
-        exit((int)1);
-    }
-
 
     // delay some constant time amount, while LED discharges
     _delay_us(MEASURE_GAP_DELAY);
