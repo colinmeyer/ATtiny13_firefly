@@ -26,44 +26,6 @@
 
 #define FF1_MASK (1<<FF1_MALE | 1<<FF1_FEMALE)
 
-// lookup table for lights status at each iteration
-const uint8_t lights[] = {
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  0
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  1
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  2
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  3
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  4
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  5
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  6
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  7
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  8
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  9
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  10
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  11
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  12
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  13
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  14
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  15
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  16
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  17
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  18
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  19
-    0<<FF1_MALE | 1<<FF1_FEMALE ,  //  20
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  21
-    0<<FF1_MALE | 1<<FF1_FEMALE ,  //  22
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  23
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  24
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  25
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  26
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  27
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  28
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  29
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  30
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  31
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  32
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  33
-};
-
 
 // light meter returns true when it's dark out
 uint8_t light_is_low_enough() {
