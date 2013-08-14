@@ -15,8 +15,8 @@
                        // by default, sysclock is /8
 #include <util/delay.h>
 
-#define POWER_DELAY         1
-#define MEASURE_GAP_DELAY  10
+#define POWER_DELAY          1    // ms
+#define MEASURE_GAP_DELAY 100000   // us
 
 #define FF1_ITERATIONS 33
 
@@ -74,7 +74,7 @@ uint8_t light_is_low_enough() {
 
 
     // delay some constant time amount, while LED discharges
-    _delay_ms(MEASURE_GAP_DELAY);
+    _delay_us(MEASURE_GAP_DELAY);
 
     ADCSRA |= (1 << ADSC);        // start single conversion
     while (ADCSRA & (1 << ADSC)); // wait until conversion is done
