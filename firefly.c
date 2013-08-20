@@ -23,50 +23,10 @@
 #define FF1_MALE_  PB4   // pin 3
 #define FF1_FEMALE PB1   // pin 6
 
-#define FF1_MASK (1<<FF1_MALE | 1<<FF1_FEMALE)
-
-// lookup table for lights status at each iteration
-const uint8_t lights[] = {
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  0
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  1
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  2
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  3
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  4
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  5
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  6
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  7
-    1<<FF1_MALE | 0<<FF1_FEMALE ,  //  8
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  9
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  10
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  11
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  12
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  13
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  14
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  15
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  16
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  17
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  18
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  19
-    0<<FF1_MALE | 1<<FF1_FEMALE ,  //  20
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  21
-    0<<FF1_MALE | 1<<FF1_FEMALE ,  //  22
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  23
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  24
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  25
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  26
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  27
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  28
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  29
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  30
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  31
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  32
-    0<<FF1_MALE | 0<<FF1_FEMALE ,  //  33
-};
 
 
-// light returns count of ADC samples for LED capacitor to reach zero
-//   count < 30 means light out
-uint8_t light_detect() {
+// returns true when it's dark
+uint8_t dark_out() {
     // read ADC2 input
     ADMUX = 2               // Select channel ADC = 2
         | (1<<ADLAR);       // Left shift 8 significant bits to ADCH
@@ -93,6 +53,8 @@ uint8_t light_detect() {
     PORTB &= ~(1<<FF1_MALE_ ); // set pin to low (switch pull-up resistor off)
                          // now pin is tri-state
 
+    // count loop iterations until voltage read from "capacitor" LED
+    // is less than threshold
     uint8_t c = 0;
     do {
         c++;
@@ -108,7 +70,11 @@ uint8_t light_detect() {
     // turn off ADC
     ADCSRA &= ~(1<<ADEN);
 
-    return c;
+//  count < 30 means light out
+    if (c > 30)
+        return 0;
+    else
+        return 1;
 }
 
 
@@ -117,7 +83,11 @@ uint8_t  mode = 0; // 0 = light meter
                    // 1 = firefly
 ISR(WDT_vect) {
     if (mode==0) {
-        if (light_is_low_enough()) {
+        // signal mode 0, FF1_FEMALE light on
+        DDRB  |= 1<<DDB1;
+        PORTB |= 1<<FF1_FEMALE;
+
+        if (dark_out()) {
             // switch to firefly
             mode=1;
 
@@ -131,16 +101,19 @@ ISR(WDT_vect) {
         // set output pins
         DDRB  = (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
 
+        // turn off mode0 light
+        PORTB &= ~(1<<FF1_FEMALE);
+
         // set PORT B to whatever the lookup table says
-        PORTB = (lights[c] & FF1_MASK);
+        PORTB |= 1<<FF1_MALE;
 
         if (++c==FF1_ITERATIONS) {
             // change to light meter
             mode=0;
             c=0;
 
-            // shut off all lights
-            PORTB = 0;
+            PORTB = 0; // shut off all lights
+            DDRB  = 0; // shut off outputs
 
             // adjust WDT prescaler
             WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
