@@ -49,15 +49,15 @@ uint8_t light_detect() {
     uint8_t   adch;
 
     // charge detector LED briefly (it is a capacitor)
-    DDRB  =  (1<<DDB4); // select pin 3 for output
-    PORTB =  (1<<FF1_MALE_ ); // set pin to high
+    DDRB  |= (1<<DDB4); // select pin 3 for output
+    PORTB  = (1<<FF1_MALE_ ); // set pin to high
     _delay_ms(POWER_DELAY); // charge for some time
 
-    DDRB  = 0;           // select pin 3 for tri-state
-                         // currently, pin is still tied to pull-up resistor
-                         // cf.  10.2.3 p.51
-    PORTB &= ~(1<<FF1_MALE_ ); // set pin to low (switch pull-up resistor off)
-                         // now pin is tri-state
+    DDRB  &= ~(1<<DDB4);  // select pin 3 for input
+                          // currently, pin is still tied to pull-up resistor
+                          // cf.  10.2.3 p.51
+    PORTB &= ~(1<<FF1_MALE_);  // set pin 3 to low (switch pull-up resistor off)
+                               // now pin is tri-state
 
     uint8_t c = 0;
     do {
