@@ -69,8 +69,11 @@ uint8_t light_detect() {
         adcl = ADCL;
         adch = ADCH;
     }
-    while ( adch > 0 && adcl > 0x10 );
-
+    while ( adch && adcl > 0x05 );
+ 
+    // turn off ADC
+    ADCSRA &= ~(1<<ADEN);
+ 
     return c;
 }
 
