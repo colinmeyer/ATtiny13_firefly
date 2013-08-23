@@ -33,7 +33,7 @@
 
 // light returns count of ADC samples for LED capacitor to reach zero
 //   count < 30 means light out
-uint8_t light_detect() {
+uint16_t light_detect() {
     // read ADC2 input
     ADMUX = 2;              // Select channel ADC = 2
     ADCSRA |= (1<<ADEN)     // turn on ADC
@@ -59,7 +59,7 @@ uint8_t light_detect() {
     PORTB &= ~(1<<FF1_MALE_);  // set pin 3 to low (switch pull-up resistor off)
                                // now pin is tri-state
 
-    uint8_t c = 0;
+    uint16_t c = 0;
     do {
         c++;
         ADCSRA |= (1 << ADSC);        // start single conversion
@@ -82,10 +82,10 @@ uint8_t light_detect() {
 int main(void)
 {
     uint8_t c;
-    for ( c = 0; c < 64; c++ ) { // writing four bytes each call it light_is_low_enough()
-        uint8_t light;
+    for ( c = 0; c < 32; c++ ) { // writing four bytes each call it light_is_low_enough()
+        uint16_t light;
         light = light_detect();
-        eeprom_update_byte( (uint8_t *)c, light );
+        eeprom_update_word( (uint8_t *)(c+c), light );
         _delay_ms(100);
     }
 
@@ -93,8 +93,6 @@ int main(void)
     DDRB  = (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
     // turn on light
     PORTB = 1<<FF1_MALE;
-    _delay_ms(250);
-
 
     return 0;
 }
