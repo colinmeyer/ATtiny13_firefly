@@ -30,6 +30,7 @@ $(PRG).o: $(PRG).c
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak 
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
+	rm -rf *_eeprom
 
 lst:  $(PRG).lst
 
