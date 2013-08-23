@@ -16,13 +16,17 @@
 #include <util/delay.h>
 
 #define POWER_DELAY          1    // ms
-#define MEASURE_GAP_DELAY 100000   // us
-
-#define FF1_ITERATIONS 33
 
 #define FF1_MALE   PB3   // pin 2
 #define FF1_MALE_  PB4   // pin 3
 #define FF1_FEMALE PB1   // pin 6
+
+//                 ---------                       
+//              1--|.   AT |--8  Vcc       
+//         PB3  2--|  tiny |--7            
+//  ADC2 / PB4  3--|   13a |--6  PB1       
+//         GND  4--|       |--5            
+//                 ---------               
 
 #define FF1_MASK (1<<FF1_MALE | 1<<FF1_FEMALE)
 
