@@ -90,7 +90,7 @@ int main(void)
     }
 
     // set output pins
-    DDRB  = (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
+    DDRB  |= (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
     // turn on light
     PORTB = 1<<FF1_MALE;
 
