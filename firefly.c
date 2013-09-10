@@ -50,7 +50,7 @@ uint16_t light_detect() {
 
     // charge detector LED briefly (it is a capacitor)
     DDRB  |= (1<<DDB4); // select pin 3 for output
-    PORTB  = (1<<FF1_MALE_ ); // set pin to high
+    PORTB |= (1<<FF1_MALE_ ); // set pin to high
     _delay_ms(POWER_DELAY); // charge for some time
 
     DDRB  &= ~(1<<DDB4);  // select pin 3 for input
@@ -69,7 +69,7 @@ uint16_t light_detect() {
         adcl = ADCL;
         adch = ADCH;
     }
-    while ( adch && adcl > 0x05 );
+    while ( adch && (adcl > 0x05) );
  
     // turn off ADC
     ADCSRA &= ~(1<<ADEN);
@@ -82,10 +82,10 @@ uint16_t light_detect() {
 int main(void)
 {
     uint8_t c;
-    for ( c = 0; c < 32; c++ ) { // writing four bytes each call it light_is_low_enough()
+    for ( c = 0; c < 64; c += 2 ) { // writing four bytes each call it light_is_low_enough()
         uint16_t light;
         light = light_detect();
-        eeprom_update_word( (uint8_t *)(c+c), light );
+        eeprom_update_word( (uint8_t *)(c), light );
         _delay_ms(100);
     }
 
