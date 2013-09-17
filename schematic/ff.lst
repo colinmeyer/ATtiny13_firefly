@@ -1,0 +1,23 @@
+eeschema (2012-apr-16-27)-stable  >> Creation date: Tue 17 Sep 2013 01:52:57 AM PDT
+
+#Cmp ( order = Reference )
+| D1         LED         
+| D2         LED         
+| IC1        ATTINY13A-P 
+| Photoresistor R           
+| R1         440         
+| R2         440         
+| R3         R           
+#End Cmp
+
+#Cmp ( order = Value )
+| 440          R1        
+| 440          R2        
+| ATTINY13A-P  IC1       
+| LED          D1        
+| LED          D2        
+| R            Photoresistor
+| R            R3        
+#End Cmp
+
+#End List

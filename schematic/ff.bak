@@ -1,0 +1,175 @@
+EESchema Schematic File Version 2  date Tue 17 Sep 2013 01:50:42 AM PDT
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:special
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:ff-cache
+EELAYER 25  0
+EELAYER END
+$Descr A4 11700 8267
+encoding utf-8
+Sheet 1 1
+Title "Firefly"
+Date "17 sep 2013"
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Wire Wire Line
+	4100 3650 4350 3650
+Wire Wire Line
+	4350 3650 4350 3200
+Wire Wire Line
+	4350 3200 4550 3200
+Wire Wire Line
+	4100 4200 3300 4200
+Wire Wire Line
+	3650 4200 3650 3900
+Wire Wire Line
+	4100 3700 4100 3600
+Connection ~ 3300 4200
+Connection ~ 4100 3650
+Wire Wire Line
+	3650 3300 3650 3400
+Wire Wire Line
+	3300 2900 3300 2800
+Wire Wire Line
+	3300 2800 4550 2800
+Wire Wire Line
+	6600 3450 6600 3300
+Wire Wire Line
+	6600 3300 6550 3300
+Wire Wire Line
+	6550 2800 6600 2800
+Wire Wire Line
+	6600 2800 6600 2650
+Wire Wire Line
+	4550 2900 3650 2900
+Wire Wire Line
+	3300 3300 3300 3400
+Wire Wire Line
+	3300 3900 3300 4450
+Connection ~ 3650 4200
+Wire Wire Line
+	4100 3100 4550 3100
+$Comp
+L R R3
+U 1 1 52381708
+P 4100 3950
+F 0 "R3" V 4180 3950 50  0000 C CNN
+F 1 "R" V 4100 3950 50  0000 C CNN
+	1    4100 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L R Photoresistor
+U 1 1 523816FD
+P 4100 3350
+F 0 "Photoresistor" V 4180 3350 50  0000 C CNN
+F 1 "R" V 4100 3350 50  0000 C CNN
+	1    4100 3350
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 52381536
+P 3300 4450
+F 0 "#PWR?" H 3300 4450 30  0001 C CNN
+F 1 "GND" H 3300 4380 30  0001 C CNN
+	1    3300 4450
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 52380A43
+P 6600 3450
+F 0 "#PWR?" H 6600 3450 30  0001 C CNN
+F 1 "GND" H 6600 3380 30  0001 C CNN
+	1    6600 3450
+	1    0    0    -1  
+$EndComp
+$Comp
+L VCC #PWR?
+U 1 1 52380A3B
+P 6600 2650
+F 0 "#PWR?" H 6600 2750 30  0001 C CNN
+F 1 "VCC" H 6600 2750 30  0000 C CNN
+	1    6600 2650
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R2
+U 1 1 52380938
+P 3650 3650
+F 0 "R2" V 3730 3650 50  0000 C CNN
+F 1 "440" V 3650 3650 50  0000 C CNN
+	1    3650 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L LED D2
+U 1 1 5238092C
+P 3650 3100
+F 0 "D2 female" H 3650 3200 50  0000 C CNN
+F 1 "LED" H 3650 3000 50  0000 C CNN
+	1    3650 3100
+	0    -1   1    0   
+$EndComp
+$Comp
+L R R1
+U 1 1 5238084E
+P 3300 3650
+F 0 "R1" V 3380 3650 50  0000 C CNN
+F 1 "440" V 3300 3650 50  0000 C CNN
+	1    3300 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L LED D1
+U 1 1 523804D6
+P 3300 3100
+F 0 "D1 male" H 3300 3200 50  0000 C CNN
+F 1 "LED" H 3300 3000 50  0000 C CNN
+	1    3300 3100
+	0    -1   1    0   
+$EndComp
+$Comp
+L ATTINY13A-P IC?
+U 1 1 52380490
+P 4750 2700
+F 0 "IC?" H 4850 2750 60  0000 C CNN
+F 1 "ATTINY13A-P" H 6050 1950 60  0000 C CNN
+F 2 "DIP8" H 4850 1950 60  0001 C CNN
+	1    4750 2700
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC
