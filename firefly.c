@@ -1,10 +1,10 @@
-/*
- * ATtiny13a LED Firefly
- * File: firefly.c
- *
- * 
- *
- */
+//
+// ATtiny13a LED Firefly
+//
+// cf.
+//
+//     Atmel ATtiny13 manual 
+//     http://www.atmel.com/Images/doc8126.pdf 
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -19,62 +19,48 @@
 
 #define FF1_ITERATIONS 33
 
-#define FF1_MALE   PB3   // pin 2
-#define FF1_MALE_  PB4   // pin 3
-#define FF1_FEMALE PB1   // pin 6
+#define FF1_MALE      1<<PB0   // pin 5
+#define FF1_MALE_DD   1<<DDB0  // pin 5
+#define FF1_FEMALE    1<<PB1   // pin 6
+#define FF1_FEMALE_DD 1<<DDB1  // pin 6
 
-
+#define LM_POWER      1<<PB3   // pin 2
+#define LM_POWER_DD   1<<DDB3  // pin 2
 
 // returns true when it's dark
 uint8_t dark_out() {
-    // read ADC2 input
+    // turn on power to light detector
+    DDRB  |= LM_POWER_DD;
+    PORTB |= LM_POWER;
+
+    // read ADC2 input (pin 3)
     ADMUX = 2               // Select channel ADC = 2
         | (1<<ADLAR);       // Left shift 8 significant bits to ADCH
-    ADCSRA |= (1<<ADEN)     // turn on ADC
-        | (1<<ADPS0)        // set prescaler to sysclck/128 for greater accuracy
-        | (1<<ADPS1)        // cf. 14.5 p.84 & 14.12.2 p.94
-        | (1<<ADPS2);
+    ADCSRA |= (1<<ADEN);    // turn on ADC
 
     // throw away
     ADCSRA |= (1 << ADSC);        // start single conversion
     while (ADCSRA & (1 << ADSC)); // wait until conversion is done
 
-    uint8_t   adcl;
-    uint8_t   adch;
+    unsigned char  measure  = 0;  // 8 bit
 
-    // charge detector LED briefly (it is a capacitor)
-    DDRB  =  (1<<DDB4); // select pin 3 for output
-    PORTB =  (1<<FF1_MALE_ ); // set pin to high
-    _delay_ms(POWER_DELAY); // charge for some time
+    ADCSRA |= (1 << ADSC);        // start single conversion
+    while (ADCSRA & (1 << ADSC)); // wait until conversion is done
 
-    DDRB  = 0;           // select pin 3 for tri-state
-                         // currently, pin is still tied to pull-up resistor
-                         // cf.  10.2.3 p.51
-    PORTB &= ~(1<<FF1_MALE_ ); // set pin to low (switch pull-up resistor off)
-                         // now pin is tri-state
-
-    // count loop iterations until voltage read from "capacitor" LED
-    // is less than threshold
-    uint8_t c = 0;
-    do {
-        c++;
-        ADCSRA |= (1 << ADSC);        // start single conversion
-        while (ADCSRA & (1 << ADSC)); // wait until conversion is done
-
-        // take first voltage measurement
-        adcl = ADCL;
-        adch = ADCH;
-    }
-    while ( adch > 0 && adcl > 0x10 );
+    measure = ADCH;
 
     // turn off ADC
     ADCSRA &= ~(1<<ADEN);
 
-//  count < 30 means light out
-    if (c > 30)
-        return 0;
-    else
-        return 1;
+    // turn off power to light detector
+    PORTB &= ~(LM_POWER);
+    DDRB  &= ~(LM_POWER_DD);
+
+    // ~( measure & 0x80 ) means dark
+    // i.e. measure < 0x80
+    // i.e. just look at the most significant bit.
+    //      1 == light ; 0 == dark
+    return ~(measure & 0x80);
 }
 
 
@@ -84,8 +70,8 @@ uint8_t  mode = 0; // 0 = light meter
 ISR(WDT_vect) {
     if (mode==0) {
         // signal mode 0, FF1_FEMALE light on
-        DDRB  |= 1<<DDB1;
-        PORTB |= 1<<FF1_FEMALE;
+        DDRB  |= FF1_FEMALE_DD;
+        PORTB |= FF1_FEMALE;
 
         if (dark_out()) {
             // switch to firefly
@@ -93,27 +79,28 @@ ISR(WDT_vect) {
 
             // adjust WDT prescaler
             WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
-                | (1<<WDP2);       // 32k ~.25 8.5.2 p.43
+                | (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
+                //| (1<<WDP2);       // 32k ~.25 8.5.2 p.43
         }
     }
 
     if (mode==1) {
         // set output pins
-        DDRB  = (1<<DDB3) | (1<<DDB4) | (1<<DDB1);
+        DDRB  |= FF1_FEMALE_DD | FF1_MALE_DD;
 
         // turn off mode0 light
-        PORTB &= ~(1<<FF1_FEMALE);
+        PORTB &= ~(FF1_FEMALE);
 
         // set PORT B to whatever the lookup table says
-        PORTB |= 1<<FF1_MALE;
+        PORTB |= FF1_MALE;
 
         if (++c==FF1_ITERATIONS) {
             // change to light meter
             mode=0;
             c=0;
 
-            PORTB = 0; // shut off all lights
-            DDRB  = 0; // shut off outputs
+            PORTB &= ~(FF1_MALE | FF1_FEMALE); // shut off all lights
+            DDRB  &= ~(FF1_MALE_DD | FF1_FEMALE_DD); // shut off outputs
 
             // adjust WDT prescaler
             WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
