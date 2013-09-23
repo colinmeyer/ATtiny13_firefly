@@ -77,6 +77,9 @@ ISR(WDT_vect) {
             // switch to firefly
             mode=1;
 
+            // turn off mode0 light
+            PORTB &= ~(FF1_FEMALE);
+
             // adjust WDT prescaler
             WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
                 | (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
@@ -88,10 +91,7 @@ ISR(WDT_vect) {
         // set output pins
         DDRB  |= FF1_FEMALE_DD | FF1_MALE_DD;
 
-        // turn off mode0 light
-        PORTB &= ~(FF1_FEMALE);
-
-        // set PORT B to whatever the lookup table says
+        // mode1 light
         PORTB |= FF1_MALE;
 
         if (++c==FF1_ITERATIONS) {
