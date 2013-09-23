@@ -16,14 +16,46 @@
 
 unsigned int c=0; // 16 bit
 ISR(WDT_vect) {
-    // set PORT B to whatever the lookup table says
-    unsigned char ff1_idx = c % FF1_ITERATIONS;
-    unsigned char ff2_idx = c % FF2_ITERATIONS;
-    PORTB = (lights[ff1_idx] & FF1_MASK) | (lights[ff2_idx] & FF2_MASK);
+    if (mode==0) {
+        // signal mode 0, FF1_FEMALE light on
+        DDRB  |= FF1_FEMALE_DD;
+        PORTB |= FF1_FEMALE;
 
-    // increment loop counter; reset if we've reached the LCM
-    if (++c==COMBINED_ITERATIONS)
-        c=0;
+        if (dark_out()) {
+            // switch to firefly
+            mode=1;
+
+            // turn off mode0 light
+            PORTB &= ~(FF1_FEMALE);
+
+            // adjust WDT prescaler
+            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
+                | (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
+                //| (1<<WDP2);       // 32k ~.25 8.5.2 p.43
+        }
+    }
+
+    if (mode==1) {
+        // set output pins
+        DDRB  |= FF1_FEMALE_DD | FF1_MALE_DD;
+
+        // mode1 light
+        PORTB |= FF1_MALE;
+
+        if (++c==FF1_ITERATIONS) {
+            // change to light meter
+            mode=0;
+            c=0;
+
+            PORTB &= ~(FF1_MALE | FF1_FEMALE); // shut off all lights
+            DDRB  &= ~(FF1_MALE_DD | FF1_FEMALE_DD); // shut off outputs
+
+            // adjust WDT prescaler
+            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
+                | (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
+
+        }
+    }
 }
 
 int main(void)
