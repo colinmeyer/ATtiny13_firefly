@@ -60,7 +60,7 @@ uint8_t dark_out() {
     // i.e. measure < 0x80
     // i.e. just look at the most significant bit.
     //      1 == light ; 0 == dark
-    return ~(measure & 0x80);
+    return !(measure & 0x80);
 }
 
 
