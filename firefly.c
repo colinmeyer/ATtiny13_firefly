@@ -1,37 +1,80 @@
-/*
- * ATtiny13a LED Firefly
- * File: firefly.c
- *
- * 
- *
- */
+//
+// ATtiny13a LED Firefly
+//
+// cf.
+//
+//     Atmel ATtiny13 manual 
+//     http://www.atmel.com/Images/doc8126.pdf 
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
+#define FF1_MALE         PB0   // pin 5
+#define FF1_MALE_DD   1<<DDB0  // pin 5
+#define FF1_FEMALE       PB1   // pin 6
+#define FF1_FEMALE_DD 1<<DDB1  // pin 6
+
+#define LM_POWER      1<<PB3   // pin 2
+#define LM_POWER_DD   1<<DDB3  // pin 2
+
 // defines lights[]
 #include "photinus_consimilis.h"
 // #include "photinus_pyralis.h"
 
-unsigned int c=0; // 16 bit
+
+// returns true when it's dark
+uint8_t dark_out() {
+    // turn on power to light detector
+    DDRB  |= LM_POWER_DD;
+    PORTB |= LM_POWER;
+
+    // read ADC2 input (pin 3)
+    ADMUX = 2               // Select channel ADC = 2
+        | (1<<ADLAR);       // Left shift 8 significant bits to ADCH
+    ADCSRA |= (1<<ADEN);    // turn on ADC
+
+    // throw away
+    ADCSRA |= (1 << ADSC);        // start single conversion
+    while (ADCSRA & (1 << ADSC)); // wait until conversion is done
+
+    uint8_t measure  = 0;  // 8 bit
+
+    ADCSRA |= (1 << ADSC);        // start single conversion
+    while (ADCSRA & (1 << ADSC)); // wait until conversion is done
+
+    measure = ADCH;
+
+    // turn off ADC
+    ADCSRA &= ~(1<<ADEN);
+
+    // turn off power to light detector
+    PORTB &= ~(LM_POWER);
+    DDRB  &= ~(LM_POWER_DD);
+
+    // !( measure & 0x80 ) means dark
+    // i.e. measure < 0x80
+    // i.e. just look at the most significant bit.
+    //      1 == light ; 0 == dark
+//     if ( measure < 0x10 )
+//         return 1;
+//     else
+//         return 0;
+    return !(measure & 0x80);
+}
+
+
+uint16_t c=0;
+uint8_t  mode=0;
 ISR(WDT_vect) {
     if (mode==0) {
-        // signal mode 0, FF1_FEMALE light on
-        DDRB  |= FF1_FEMALE_DD;
-        PORTB |= FF1_FEMALE;
-
         if (dark_out()) {
             // switch to firefly
             mode=1;
 
-            // turn off mode0 light
-            PORTB &= ~(FF1_FEMALE);
-
-            // adjust WDT prescaler
+            // adjust WDT prescaler for firefly mode
             WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
-                | (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
-                //| (1<<WDP2);       // 32k ~.25 8.5.2 p.43
+                | (1<<WDP2);       // 32k ~.25 8.5.2 p.43
         }
     }
 
@@ -39,20 +82,26 @@ ISR(WDT_vect) {
         // set output pins
         DDRB  |= FF1_FEMALE_DD | FF1_MALE_DD;
 
-        // mode1 light
-        PORTB |= FF1_MALE;
+        // display current fireflylights
+            // note that we're just overwriting all of PORTB,
+            // rather than trying to decide which lights to turn
+            // off and which to turn on
+        PORTB = lights[c] & FF1_MASK;
 
-        if (++c==FF1_ITERATIONS) {
+        // when we've run through a cycle of the firefly, 
+        // switch back to light meter mode
+        if (c++ == FF1_ITERATIONS) {
             // change to light meter
             mode=0;
             c=0;
 
-            PORTB &= ~(FF1_MALE | FF1_FEMALE); // shut off all lights
+            PORTB &= ~(1<<FF1_MALE | 1<<FF1_FEMALE); // shut off all lights
+            
             DDRB  &= ~(FF1_MALE_DD | FF1_FEMALE_DD); // shut off outputs
 
-            // adjust WDT prescaler
+            // adjust WDT prescaler for light meter mode
             WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
-                | (1<<WDP2)|(1<<WDP1); // 1s //(1<<WDP3);   // 10M ~8s  8.5.2 p.43
+                | (1<<WDP2)|(1<<WDP1); // 1s 
 
         }
     }
@@ -84,10 +133,6 @@ int main(void)
         (1<<ADC1D) |
         (1<<ADC2D) |
         (1<<ADC3D);
-
-
-    // Set up Port B pin 0,1,3,4 mode to output
-    DDRB = 1<<DDB0 | 1<<DDB1 | 1<<DDB3 | 1<<DDB4;
 
     // Set up Port B data to be all low
     PORTB = 0;  
