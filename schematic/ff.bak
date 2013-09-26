@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Tue 17 Sep 2013 07:03:48 AM PDT
+EESchema Schematic File Version 2  date Tue 17 Sep 2013 07:05:57 AM PDT
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -87,7 +87,7 @@ L R R3
 U 1 1 52381708
 P 4100 3950
 F 0 "R3" V 4180 3950 50  0000 C CNN
-F 1 "R" V 4100 3950 50  0000 C CNN
+F 1 "100K" V 4100 3950 50  0000 C CNN
 	1    4100 3950
 	1    0    0    -1  
 $EndComp
@@ -96,7 +96,7 @@ L R Photoresistor
 U 1 1 523816FD
 P 4100 3350
 F 0 "Photoresistor" V 4180 3350 50  0000 C CNN
-F 1 "R" V 4100 3350 50  0000 C CNN
+F 1 "0-1M" V 4100 3350 50  0000 C CNN
 	1    4100 3350
 	1    0    0    -1  
 $EndComp

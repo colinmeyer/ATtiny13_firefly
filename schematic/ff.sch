@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Tue 17 Sep 2013 07:05:57 AM PDT
+EESchema Schematic File Version 2  date Wed 25 Sep 2013 09:21:01 PM PDT
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -36,7 +36,7 @@ $Descr A4 11700 8267
 encoding utf-8
 Sheet 1 1
 Title "Firefly"
-Date "17 sep 2013"
+Date "26 sep 2013"
 Rev ""
 Comp ""
 Comment1 ""
@@ -45,7 +45,11 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Wire Wire Line
-	3300 4200 6600 4200
+	3300 4200 3650 4200
+Wire Wire Line
+	3650 4200 4100 4200
+Wire Wire Line
+	4100 4200 6600 4200
 Wire Wire Line
 	6600 4200 6600 3300
 Wire Wire Line
@@ -54,7 +58,9 @@ Wire Wire Line
 	4100 3100 4550 3100
 Connection ~ 3650 4200
 Wire Wire Line
-	3300 3900 3300 4450
+	3300 3900 3300 4200
+Wire Wire Line
+	3300 4200 3300 4450
 Wire Wire Line
 	3300 3300 3300 3400
 Wire Wire Line
@@ -72,7 +78,9 @@ Wire Wire Line
 Connection ~ 4100 3650
 Connection ~ 3300 4200
 Wire Wire Line
-	4100 3700 4100 3600
+	4100 3700 4100 3650
+Wire Wire Line
+	4100 3650 4100 3600
 Wire Wire Line
 	3650 4200 3650 3900
 Wire Wire Line
@@ -87,7 +95,7 @@ L R R3
 U 1 1 52381708
 P 4100 3950
 F 0 "R3" V 4180 3950 50  0000 C CNN
-F 1 "100K" V 4100 3950 50  0000 C CNN
+F 1 "160k" V 4100 3950 50  0000 C CNN
 	1    4100 3950
 	1    0    0    -1  
 $EndComp
@@ -128,7 +136,7 @@ F 1 "440" V 3650 3650 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED D2~female
+L LED D2
 U 1 1 5238092C
 P 3650 3100
 F 0 "D2 female" H 3650 3200 50  0000 C CNN
