@@ -71,7 +71,7 @@ uint8_t runstate() {
 
             if ( dark_out() ) {
                 state = 1;
-                counter = 4; // XXX random 4-9
+                counter = 4 + (rand() % 6); // random 4-9
             }
             else
                 ready_to_sleep = 1;
@@ -105,7 +105,7 @@ uint8_t runstate() {
 
             ready_to_sleep = 1;
             state = 4;
-            counter = 2; // XXX random 1-4
+            counter = 1 + (rand() % 4); // random 1-4
             break;
         case 4: // female on
             // set sleep to 0.5s
