@@ -103,7 +103,7 @@ uint8_t runstate() {
                 state = 3;
             break;
         case 3: // pause between male and female
-            // set sleep to 3s XXX 2s for now
+            // set sleep to 2s
             WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP1)|(1<<WDP0);
 
             state = 4;
@@ -133,7 +133,7 @@ uint8_t runstate() {
                 state = 6;
             break;
         case 6: // pause before starting over
-            // set sleep to 5s XXX 4s for now
+            // set sleep to 4s
             WDTCR = (WDTCR & 0xd8) | (1<<WDP3);
 
             state = 0;
