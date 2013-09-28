@@ -161,14 +161,19 @@ uint8_t runstate() {
 
             if( --counter )
                 state = 4;
-            else
+            else {
                 state = 8;
+                counter = 3;
+            }
             break;
         case 8: // pause before starting over
-            // set sleep to 4s
-            WDTCR = (WDTCR & 0xd8) | (1<<WDP3);
+            // set sleep to 2s, for a count of 3 => 6s total
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP1)|(1<<WDP0);
 
-            state = 0;
+            if( --counter )
+                state = 8;
+            else
+                state = 0;
             break;
     }
 
