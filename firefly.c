@@ -68,7 +68,7 @@ uint8_t dark_out() {
 uint8_t runstate() {
     static uint8_t  state = 0;
     static uint8_t  counter = 0;
-    uint8_t ready_to_sleep  = 0;
+    uint8_t ready_to_sleep  = 1;
 
     switch(state) {
         case 0: // light meter mode
@@ -79,9 +79,8 @@ uint8_t runstate() {
             if ( dark_out() ) {
                 state = 1;
                 counter = 4 + (rand() % 6); // random 4-9
+                ready_to_sleep = 0;
             }
-            else
-                ready_to_sleep = 1;
             break;
         case 1: // male on
             // set sleep to 0.25s
@@ -92,14 +91,11 @@ uint8_t runstate() {
             PORTB |= FF1_MALE;
 
             state = 2;
-            ready_to_sleep = 1;
             break;
         case 2: // male off
             // turn light off
             DDRB  &= ~(FF1_MALE_DD);
             PORTB &= ~(FF1_MALE);
-
-            ready_to_sleep = 1;
 
             if( --counter )
                 state = 1;
@@ -110,7 +106,6 @@ uint8_t runstate() {
             // set sleep to 3s XXX 2s for now
             WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP1)|(1<<WDP0);
 
-            ready_to_sleep = 1;
             state = 4;
             counter = 1 + (rand() % 4); // random 1-4
             break;
@@ -123,7 +118,6 @@ uint8_t runstate() {
             PORTB |= FF1_FEMALE;
 
             state = 5;
-            ready_to_sleep = 1;
             break;
         case 5: // female off
             // set sleep to 0.25s
@@ -132,8 +126,6 @@ uint8_t runstate() {
             // turn light off
             DDRB  &= ~(FF1_FEMALE_DD);
             PORTB &= ~(FF1_FEMALE);
-
-            ready_to_sleep = 1;
 
             if( --counter )
                 state = 4;
@@ -144,7 +136,6 @@ uint8_t runstate() {
             // set sleep to 5s XXX 4s for now
             WDTCR = (WDTCR & 0xd8) | (1<<WDP3);
 
-            ready_to_sleep = 1;
             state = 0;
             break;
     }
