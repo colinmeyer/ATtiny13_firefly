@@ -78,9 +78,10 @@ uint8_t runstate() {
                 | (1<<WDP2)|(1<<WDP1); // 1s - p.43  8.5.2
 
             if ( dark_out() ) {
-                // if we've shown the ff for ~3 hrs, stop showing it
-                // for the rest of the dark period (assumes 9s avg ff cycle)
-                if ( ff_counter < 10800 ) {
+                // if we've shown the ff for ~2 hrs, stop showing it
+                // for the rest of the dark period
+                // avg ff cycle time = 15.625s, 460 cycles ~= 2hrs
+                if ( ff_counter < 460 ) {
                     state = 1;
                     ff_counter++;
                 }
