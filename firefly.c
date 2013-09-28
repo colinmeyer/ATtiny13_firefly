@@ -68,6 +68,7 @@ uint8_t dark_out() {
 uint8_t runstate() {
     static uint8_t  state = 0;
     static uint8_t  counter = 0;
+    static uint16_t ff_counter = 0;
     uint8_t ready_to_sleep  = 1;
 
     switch(state) {
@@ -77,10 +78,20 @@ uint8_t runstate() {
                 | (1<<WDP2)|(1<<WDP1); // 1s - p.43  8.5.2
 
             if ( dark_out() ) {
-                state = 1;
+                // if we've shown the ff for ~3 hrs, stop showing it
+                // for the rest of the dark period (assumes 9s avg ff cycle)
+                if ( ff_counter < 10800 ) {
+                    state = 1;
+                    ff_counter++;
+                }
+                else 
+                    state = 0;
+
                 counter = 4 + (rand() % 6); // random 4-9
                 ready_to_sleep = 0;
             }
+            else
+                ff_counter = 0;
             break;
         case 1: // male on
             // set sleep to 0.25s
