@@ -120,7 +120,7 @@ uint8_t runstate() {
             state = 4;
             counter = 1 + (rand() % 4); // random 1-4
             break;
-        case 4: // female on
+        case 4: // female on 1
             // set sleep to 0.5s
             WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP0);
 
@@ -138,12 +138,32 @@ uint8_t runstate() {
             DDRB  &= ~(FF1_FEMALE_DD);
             PORTB &= ~(FF1_FEMALE);
 
+            state = 6;
+            break;
+        case 6: // female on 2
+            // set sleep to 0.5s
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP0);
+
+            // turn on light
+            DDRB  |= FF1_FEMALE_DD;
+            PORTB |= FF1_FEMALE;
+
+            state = 7;
+            break;
+        case 7: // female off 2
+            // set sleep to 0.5s
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP0);
+
+            // turn light off
+            DDRB  &= ~(FF1_FEMALE_DD);
+            PORTB &= ~(FF1_FEMALE);
+
             if( --counter )
                 state = 4;
             else
-                state = 6;
+                state = 8;
             break;
-        case 6: // pause before starting over
+        case 8: // pause before starting over
             // set sleep to 4s
             WDTCR = (WDTCR & 0xd8) | (1<<WDP3);
 
