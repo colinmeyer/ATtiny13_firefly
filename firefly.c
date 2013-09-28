@@ -10,17 +10,13 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
-#define FF1_MALE         PB0   // pin 5
+#define FF1_MALE      1<<PB0   // pin 5
 #define FF1_MALE_DD   1<<DDB0  // pin 5
-#define FF1_FEMALE       PB1   // pin 6
+#define FF1_FEMALE    1<<PB1   // pin 6
 #define FF1_FEMALE_DD 1<<DDB1  // pin 6
 
 #define LM_POWER      1<<PB3   // pin 2
 #define LM_POWER_DD   1<<DDB3  // pin 2
-
-// defines lights[]
-#include "photinus_consimilis.h"
-// #include "photinus_pyralis.h"
 
 
 // returns true when it's dark
@@ -56,55 +52,101 @@ uint8_t dark_out() {
     // i.e. measure < 0x80
     // i.e. just look at the most significant bit.
     //      1 == light ; 0 == dark
-//     if ( measure < 0x10 )
-//         return 1;
-//     else
-//         return 0;
     return !(measure & 0x80);
 }
 
 
-uint16_t c=0;
-uint8_t  mode=0;
+// runs current state
+// returns true if ready to sleep
+uint8_t runstate() {
+    static uint8_t  state = 0;
+    static uint8_t  counter = 0;
+    uint8_t ready_to_sleep  = 0;
+
+    switch(state) {
+        case 0: // light meter mode
+            // set sleep to 1s
+            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
+                | (1<<WDP2)|(1<<WDP1); // 1s - p.43  8.5.2
+
+            if ( dark_out() ) {
+                state = 1;
+                counter = 4; // XXX random 4-9
+            }
+            else
+                ready_to_sleep = 1;
+            break;
+        case 1: // male on
+            // set sleep to 0.25s
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP2);
+
+            // turn on light
+            DDRB  |= FF1_MALE_DD;
+            PORTB |= FF1_MALE;
+
+            state = 2;
+            ready_to_sleep = 1;
+            break;
+        case 2: // male off
+            // turn light off
+            DDRB  &= ~(FF1_MALE_DD);
+            PORTB &= ~(FF1_MALE);
+
+            ready_to_sleep = 1;
+
+            if( --counter )
+                state = 1;
+            else
+                state = 3;
+            break;
+        case 3: // pause between male and female
+            // set sleep to 3s XXX 2s for now
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP1)|(1<<WDP0);
+
+            ready_to_sleep = 1;
+            state = 4;
+            counter = 2; // XXX random 1-4
+            break;
+        case 4: // female on
+            // set sleep to 0.5s
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP0);
+
+            // turn on light
+            DDRB  |= FF1_FEMALE_DD;
+            PORTB |= FF1_FEMALE;
+
+            state = 5;
+            ready_to_sleep = 1;
+            break;
+        case 5: // female off
+            // set sleep to 0.25s
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP2);
+
+            // turn light off
+            DDRB  &= ~(FF1_FEMALE_DD);
+            PORTB &= ~(FF1_FEMALE);
+
+            ready_to_sleep = 1;
+
+            if( --counter )
+                state = 4;
+            else
+                state = 6;
+            break;
+        case 6: // pause before starting over
+            // set sleep to 5s XXX 4s for now
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP3);
+
+            ready_to_sleep = 1;
+            state = 0;
+            break;
+    }
+
+    return ready_to_sleep;
+}
+
 ISR(WDT_vect) {
-    if (mode==0) {
-        if (dark_out()) {
-            // switch to firefly
-            mode=1;
-
-            // adjust WDT prescaler for firefly mode
-            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
-                | (1<<WDP2);       // 32k ~.25 8.5.2 p.43
-        }
-    }
-
-    if (mode==1) {
-        // set output pins
-        DDRB  |= FF1_FEMALE_DD | FF1_MALE_DD;
-
-        // display current fireflylights
-            // note that we're just overwriting all of PORTB,
-            // rather than trying to decide which lights to turn
-            // off and which to turn on
-        PORTB = lights[c] & FF1_MASK;
-
-        // when we've run through a cycle of the firefly, 
-        // switch back to light meter mode
-        if (c++ == FF1_ITERATIONS) {
-            // change to light meter
-            mode=0;
-            c=0;
-
-            PORTB &= ~(1<<FF1_MALE | 1<<FF1_FEMALE); // shut off all lights
-            
-            DDRB  &= ~(FF1_MALE_DD | FF1_FEMALE_DD); // shut off outputs
-
-            // adjust WDT prescaler for light meter mode
-            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
-                | (1<<WDP2)|(1<<WDP1); // 1s 
-
-        }
-    }
+    // just wake up and return to the main loop
 }
 
 int main(void)
@@ -148,7 +190,10 @@ int main(void)
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 
     while (1) {
-        sleep_mode();
+        // runstate() runs the current state,
+        // and returns true if we should sleep
+        if ( runstate() )
+            sleep_mode();
     }
 
     return 0;
