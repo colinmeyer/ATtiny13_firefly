@@ -5,6 +5,13 @@
 //
 //     Atmel ATtiny13 manual 
 //     http://www.atmel.com/Images/doc8126.pdf 
+//
+//     Project of initial inspiration
+//     http://www.seanet.com/~karllunt/fireflyLED.html
+//
+//     Very useful tutorial
+//     http://brownsofa.org/blog/archives/191
+//
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
