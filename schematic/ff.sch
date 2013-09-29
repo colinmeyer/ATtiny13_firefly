@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Wed 25 Sep 2013 09:21:01 PM PDT
+EESchema Schematic File Version 2  date Sun 29 Sep 2013 01:58:59 PM PDT
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -36,7 +36,7 @@ $Descr A4 11700 8267
 encoding utf-8
 Sheet 1 1
 Title "Firefly"
-Date "26 sep 2013"
+Date "29 sep 2013"
 Rev ""
 Comp ""
 Comment1 ""
@@ -45,51 +45,42 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Wire Wire Line
-	3300 4200 3650 4200
+	3300 4450 3300 4200
 Wire Wire Line
-	3650 4200 4100 4200
+	3300 3300 3300 3700
+Connection ~ 4100 4200
 Wire Wire Line
-	4100 4200 6600 4200
+	4100 3650 4350 3650
 Wire Wire Line
-	6600 4200 6600 3300
+	4350 3650 4350 3200
 Wire Wire Line
-	6600 3300 6550 3300
+	4350 3200 4550 3200
 Wire Wire Line
-	4100 3100 4550 3100
-Connection ~ 3650 4200
+	4100 3600 4100 3700
+Connection ~ 3300 4200
+Connection ~ 4100 3650
 Wire Wire Line
-	3300 3900 3300 4200
+	3300 2900 3300 2800
 Wire Wire Line
-	3300 4200 3300 4450
+	3300 2800 4550 2800
 Wire Wire Line
-	3300 3300 3300 3400
+	6550 2800 6600 2800
+Wire Wire Line
+	6600 2800 6600 2650
 Wire Wire Line
 	4550 2900 3650 2900
 Wire Wire Line
-	6600 2650 6600 2800
+	4100 3100 4550 3100
 Wire Wire Line
-	6600 2800 6550 2800
+	6550 3300 6600 3300
 Wire Wire Line
-	4550 2800 3300 2800
+	6600 3300 6600 4200
 Wire Wire Line
-	3300 2800 3300 2900
+	3650 3300 3650 3700
 Wire Wire Line
-	3650 3300 3650 3400
-Connection ~ 4100 3650
-Connection ~ 3300 4200
+	3650 3700 3300 3700
 Wire Wire Line
-	4100 3700 4100 3650
-Wire Wire Line
-	4100 3650 4100 3600
-Wire Wire Line
-	3650 4200 3650 3900
-Wire Wire Line
-	4550 3200 4350 3200
-Wire Wire Line
-	4350 3200 4350 3650
-Wire Wire Line
-	4350 3650 4100 3650
-Connection ~ 4100 4200
+	6600 4200 3300 4200
 $Comp
 L R R3
 U 1 1 52381708
@@ -127,15 +118,6 @@ F 1 "VCC" H 6600 2750 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R2
-U 1 1 52380938
-P 3650 3650
-F 0 "R2" V 3730 3650 50  0000 C CNN
-F 1 "440" V 3650 3650 50  0000 C CNN
-	1    3650 3650
-	1    0    0    -1  
-$EndComp
-$Comp
 L LED D2
 U 1 1 5238092C
 P 3650 3100
@@ -147,10 +129,10 @@ $EndComp
 $Comp
 L R R1
 U 1 1 5238084E
-P 3300 3650
-F 0 "R1" V 3380 3650 50  0000 C CNN
-F 1 "440" V 3300 3650 50  0000 C CNN
-	1    3300 3650
+P 3300 3950
+F 0 "R1" V 3380 3950 50  0000 C CNN
+F 1 "440" V 3300 3950 50  0000 C CNN
+	1    3300 3950
 	1    0    0    -1  
 $EndComp
 $Comp
