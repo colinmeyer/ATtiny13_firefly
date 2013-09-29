@@ -73,9 +73,9 @@ uint8_t runstate() {
 
     switch(state) {
         case 0: // light meter mode
-            // set sleep to 1s
-            WDTCR = (WDTCR & 0xd8)     // 0xd8 == 0b11011000 => mask out prescaler bits
-                | (1<<WDP2)|(1<<WDP1); // 1s - p.43  8.5.2
+            // set sleep to 2s
+            WDTCR = (WDTCR & 0b11011000)         // 0xd8 == 0b11011000 => mask out prescaler bits
+                | (1<<WDP2)|(1<<WDP1)|(1<<WDP0); // 2s - p.43  8.5.2
 
             if ( dark_out() ) {
                 // if we've shown the ff for ~2 hrs, stop showing it
