@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Sun 29 Sep 2013 01:58:59 PM PDT
+EESchema Schematic File Version 2  date Sun 29 Sep 2013 10:29:41 PM PDT
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -36,7 +36,7 @@ $Descr A4 11700 8267
 encoding utf-8
 Sheet 1 1
 Title "Firefly"
-Date "29 sep 2013"
+Date "30 sep 2013"
 Rev ""
 Comp ""
 Comment1 ""
@@ -118,7 +118,7 @@ F 1 "VCC" H 6600 2750 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED D2
+L LED D2~female
 U 1 1 5238092C
 P 3650 3100
 F 0 "D2 female" H 3650 3200 50  0000 C CNN
@@ -131,7 +131,7 @@ L R R1
 U 1 1 5238084E
 P 3300 3950
 F 0 "R1" V 3380 3950 50  0000 C CNN
-F 1 "440" V 3300 3950 50  0000 C CNN
+F 1 "350" V 3300 3950 50  0000 C CNN
 	1    3300 3950
 	1    0    0    -1  
 $EndComp
