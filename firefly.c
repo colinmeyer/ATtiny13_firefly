@@ -66,7 +66,7 @@ uint8_t dark_out() {
 // runs current state
 // returns true if ready to sleep
 uint8_t runstate() {
-    static uint8_t  state = 0;
+    static uint8_t  state = 1;
     static uint8_t  counter = 0;
     static uint16_t ff_counter = 0;
     uint8_t ready_to_sleep  = 1;
@@ -94,9 +94,9 @@ uint8_t runstate() {
             else
                 ff_counter = 0;
             break;
-        case 1: // male on
-            // set sleep to 0.25s
-            WDTCR = (WDTCR & 0xd8) | (1<<WDP2);
+        case 1: // red on
+            // set sleep to 0.5s
+            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP0);
 
             // turn on light
             DDRB  |= FF1_MALE_DD;
@@ -104,24 +104,14 @@ uint8_t runstate() {
 
             state = 2;
             break;
-        case 2: // male off
+        case 2: // red off
             // turn light off
             DDRB  &= ~(FF1_MALE_DD);
             PORTB &= ~(FF1_MALE);
 
-            if( --counter )
-                state = 1;
-            else
-                state = 3;
-            break;
-        case 3: // pause between male and female
-            // set sleep to 2s
-            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP1)|(1<<WDP0);
-
             state = 4;
-            counter = 1 + (rand() % 4); // random 1-4
             break;
-        case 4: // female on 1
+        case 4: // green on 1
             // set sleep to 0.5s
             WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP0);
 
@@ -131,49 +121,18 @@ uint8_t runstate() {
 
             state = 5;
             break;
-        case 5: // female off
-            // set sleep to 0.25s
-            WDTCR = (WDTCR & 0xd8) | (1<<WDP2);
-
+        case 5: // green off
             // turn light off
             DDRB  &= ~(FF1_FEMALE_DD);
             PORTB &= ~(FF1_FEMALE);
 
-            state = 6;
-            break;
-        case 6: // female on 2
-            // set sleep to 0.5s
-            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP0);
-
-            // turn on light
-            DDRB  |= FF1_FEMALE_DD;
-            PORTB |= FF1_FEMALE;
-
-            state = 7;
-            break;
-        case 7: // female off 2
-            // set sleep to 0.5s
-            WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP0);
-
-            // turn light off
-            DDRB  &= ~(FF1_FEMALE_DD);
-            PORTB &= ~(FF1_FEMALE);
-
-            if( --counter )
-                state = 4;
-            else {
-                state = 8;
-                counter = 3;
-            }
+            state = 8;
             break;
         case 8: // pause before starting over
-            // set sleep to 2s, for a count of 3 => 6s total
+            // set sleep to 2s
             WDTCR = (WDTCR & 0xd8) | (1<<WDP2)|(1<<WDP1)|(1<<WDP0);
 
-            if( --counter )
-                state = 8;
-            else
-                state = 0;
+            state = 1;
             break;
     }
 
